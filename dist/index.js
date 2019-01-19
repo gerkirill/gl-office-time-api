@@ -1,11 +1,13 @@
 "use strict";
+// todo: user id by name / email
+// idea: glo cli client
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    };
+    }
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -49,6 +51,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fetch = require('node-fetch');
+var PassDirection;
+(function (PassDirection) {
+    PassDirection["in"] = "in";
+    PassDirection["out"] = "out";
+})(PassDirection = exports.PassDirection || (exports.PassDirection = {}));
 var OfficeLocation;
 (function (OfficeLocation) {
     OfficeLocation["ODS"] = "ODS";
@@ -64,9 +71,18 @@ var FetchStatusError = /** @class */ (function (_super) {
     }
     return FetchStatusError;
 }(Error));
+exports.FetchStatusError = FetchStatusError;
+var OfficeTimeUnauthorizedError = /** @class */ (function (_super) {
+    __extends(OfficeTimeUnauthorizedError, _super);
+    function OfficeTimeUnauthorizedError(message, response) {
+        return _super.call(this, message, response) || this;
+    }
+    return OfficeTimeUnauthorizedError;
+}(FetchStatusError));
+exports.OfficeTimeUnauthorizedError = OfficeTimeUnauthorizedError;
 function fetchOfficeTimeEvents(zone, employeeId, fromTime, tillTime, basicAuthToken, timeout) {
     return __awaiter(this, void 0, void 0, function () {
-        var requestUrl, requestOptions, resp, respText, err;
+        var requestUrl, requestOptions, resp, respText;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -85,8 +101,12 @@ function fetchOfficeTimeEvents(zone, employeeId, fromTime, tillTime, basicAuthTo
                 case 2:
                     respText = _a.sent();
                     if (!resp.ok) {
-                        err = new FetchStatusError('response was not OK. Status:' + resp.status + ' Text:' + respText, resp);
-                        throw err;
+                        if (resp.status === 401) {
+                            throw new OfficeTimeUnauthorizedError('Office Time returns 401 Unauthorized.', resp);
+                        }
+                        else {
+                            throw new FetchStatusError('response was not OK. Status:' + resp.status + ' Text:' + respText, resp);
+                        }
                     }
                     return [2 /*return*/, JSON.parse(respText)];
             }
@@ -94,3 +114,4 @@ function fetchOfficeTimeEvents(zone, employeeId, fromTime, tillTime, basicAuthTo
     });
 }
 exports.fetchOfficeTimeEvents = fetchOfficeTimeEvents;
+//# sourceMappingURL=index.js.map

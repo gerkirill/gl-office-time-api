@@ -36,6 +36,12 @@ export class FetchStatusError extends Error {
   }
 }
 
+export class OfficeTimeUnauthorizedError extends FetchStatusError {
+    constructor(message: string, response: Response) {
+    super(message, response);
+  }
+}
+
 
 export async function fetchOfficeTimeEvents(
   zone: OfficeLocation,
@@ -59,8 +65,11 @@ export async function fetchOfficeTimeEvents(
   const resp: Response = await fetch(requestUrl, requestOptions);
   const respText = await resp.text();
   if (!resp.ok) {
-    const err = new FetchStatusError('response was not OK. Status:' + resp.status +' Text:' + respText, resp);
-    throw err;
+    if (resp.status === 401) {
+      throw new OfficeTimeUnauthorizedError('Office Time returns 401 Unauthorized.', resp);
+    } else {
+      throw new FetchStatusError('response was not OK. Status:' + resp.status +' Text:' + respText, resp);
+    }
   }
   return JSON.parse(respText);
 }
