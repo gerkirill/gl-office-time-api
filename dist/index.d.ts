@@ -6,6 +6,12 @@ export interface OfficeTimeEvent {
     area: string;
     working: boolean;
 }
+export interface Employee {
+    zone: OfficeLocation;
+    uid: number;
+    'last_name': string;
+    'first_name': string;
+}
 export declare enum PassDirection {
     in = "in",
     out = "out"
@@ -23,3 +29,4 @@ export declare class OfficeTimeUnauthorizedError extends FetchStatusError {
     constructor(message: string, response: Response);
 }
 export declare function fetchOfficeTimeEvents(zone: OfficeLocation, employeeId: number, fromTime: number, tillTime: number, basicAuthToken: string, timeout: number): Promise<OfficeTimeEvent[]>;
+export declare function getEmployees(basicAuthToken: string, timeout: number): Promise<Employee[]>;

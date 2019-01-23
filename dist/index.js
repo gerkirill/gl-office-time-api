@@ -7,7 +7,7 @@ var __extends = (this && this.__extends) || (function () {
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
         return extendStatics(d, b);
-    }
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -51,6 +51,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fetch = require('node-fetch');
+var JSON_API_URL = 'https://portal-ua.globallogic.com/officetime/json';
 var PassDirection;
 (function (PassDirection) {
     PassDirection["in"] = "in";
@@ -86,7 +87,7 @@ function fetchOfficeTimeEvents(zone, employeeId, fromTime, tillTime, basicAuthTo
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    requestUrl = "https://portal-ua.globallogic.com/officetime/json/events.php?" +
+                    requestUrl = JSON_API_URL + "/events.php?" +
                         ("zone=" + zone + "&employeeId=" + employeeId + "&from=" + fromTime + "&till=" + tillTime);
                     requestOptions = {
                         headers: {
@@ -114,4 +115,36 @@ function fetchOfficeTimeEvents(zone, employeeId, fromTime, tillTime, basicAuthTo
     });
 }
 exports.fetchOfficeTimeEvents = fetchOfficeTimeEvents;
+function getEmployees(basicAuthToken, timeout) {
+    return __awaiter(this, void 0, void 0, function () {
+        var requestOptions, resp, respText;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    requestOptions = {
+                        headers: {
+                            'Authorization': "Basic " + basicAuthToken
+                        },
+                        'timeout': timeout
+                    };
+                    return [4 /*yield*/, fetch(JSON_API_URL + "/employees.php", requestOptions)];
+                case 1:
+                    resp = _a.sent();
+                    return [4 /*yield*/, resp.text()];
+                case 2:
+                    respText = _a.sent();
+                    if (!resp.ok) {
+                        if (resp.status === 401) {
+                            throw new OfficeTimeUnauthorizedError('Office Time returns 401 Unauthorized.', resp);
+                        }
+                        else {
+                            throw new FetchStatusError('response was not OK. Status:' + resp.status + ' Text:' + respText, resp);
+                        }
+                    }
+                    return [2 /*return*/, JSON.parse(respText)];
+            }
+        });
+    });
+}
+exports.getEmployees = getEmployees;
 //# sourceMappingURL=index.js.map
